@@ -1,5 +1,6 @@
-﻿using System.Net.NetworkInformation;
+﻿using System.Net;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace ВКанализации
@@ -7,21 +8,31 @@ namespace ВКанализации
     public partial class MainWindow
     {
         private const string EmptyField = "";
-        public static User user;
+        public static User? user;
         
         public MainWindow()
         {
             InitializeComponent();
         }
-        //Имя != sys
-        //Имя только из букв и цифр
-        //Уникальное имя
-        //Проверки на IP (по возможности)
         private void CreateChat(object sender, RoutedEventArgs e)
         {
-            if (Username.Text == EmptyField) MessageBox.Show("Заполните имя пользователя!");
+            if (Username.Text == EmptyField)
+            {
+                MessageBox.Show("Заполните имя пользователя!");
+                return;
+            }
+            else if (Username.Text == "sys")
+            {
+                MessageBox.Show("Имя пользователя не может быть 'sys'");
+                return;
+            }
+            else if (!Regex.IsMatch(Username.Text, @"^[a-zA-Z0-9]+$")) 
+            {
+                MessageBox.Show("Имя пользователя может содержать только буквы и цифры");
+                return;
+            }
             else
-            { 
+            {
                 user = new User(Username.Text);
                 var server = new Server();
                 server.Show();
@@ -30,7 +41,26 @@ namespace ВКанализации
         }
         private void JoinChat(object sender, RoutedEventArgs e)
         {
-            if (Username.Text == EmptyField || IpAddress.Text == "") MessageBox.Show("Проверьте заполненность имени или введенный IP адрес");
+            if (Username.Text == EmptyField || IpAddress.Text == "")
+            {
+                MessageBox.Show("Проверьте заполненность имени или введенный IP адрес");
+                return;
+            }
+            else if (Username.Text == "sys")
+            {
+                MessageBox.Show("Имя пользователя не может быть 'sys'");
+                return;
+            }
+            else if (!Regex.IsMatch(Username.Text, @"^[a-zA-Z0-9]+$")) 
+            {
+                MessageBox.Show("Имя пользователя может содержать только буквы и цифры");
+                return;
+            }
+            else if (!IPAddress.TryParse(IpAddress.Text, out _))
+            {
+                MessageBox.Show("Неверный адрес");
+                return;
+            }
             else
             {
                 user = new User(Username.Text, IpAddress.Text);
